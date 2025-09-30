@@ -1,7 +1,5 @@
 import prisma from "@/db/prisma";
 import { prismaSafe } from "@/lib/prismaSafe";
-import type { Prisma } from "@prisma/client";
-import { success } from "zod";
 
 class TagServices {
   async getAllTags() {
@@ -63,6 +61,75 @@ class TagServices {
       return { success: true, data: result };
     } catch (error) {
       console.log(`Failed to check tag existence, ${error}`);
+      return { success: false, error: error };
+    }
+  }
+
+  async getTagById(id: string) {
+    try {
+      const [error, result] = await prismaSafe(
+        prisma.tag.findUnique({
+          where: {
+            id,
+          },
+        })
+      );
+      if (error) {
+        return { success: false, error: error };
+      }
+      if (!result) {
+        return { success: false, error: "Tag not found" };
+      }
+      return { success: true, data: result };
+    } catch (error) {
+      console.log(`Failed to fetch tag by id, ${error}`);
+      return { success: false, error: error };
+    }
+  }
+
+  async updateTag(id: string, name: string) {
+    try {
+      const [error, result] = await prismaSafe(
+        prisma.tag.update({
+          where: {
+            id,
+          },
+          data: {
+            name,
+          },
+        })
+      );
+      if (error) {
+        return { success: false, error: error };
+      }
+      if (!result) {
+        return { success: false, error: "Failed to update tag" };
+      }
+      return { success: true, data: result };
+    } catch (error) {
+      console.log(`Failed to update tag, ${error}`);
+      return { success: false, error: error };
+    }
+  }
+
+  async deleteTag(id: string) {
+    try {
+      const [error, result] = await prismaSafe(
+        prisma.tag.delete({
+          where: {
+            id,
+          },
+        })
+      );
+      if (error) {
+        return { success: false, error: error };
+      }
+      if (!result) {
+        return { success: false, error: "Failed to delete tag" };
+      }
+      return { success: true, data: result };
+    } catch (error) {
+      console.log(`Failed to delete tag, ${error}`);
       return { success: false, error: error };
     }
   }
